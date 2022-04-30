@@ -42,8 +42,8 @@ async function run() {
             }
             const filter = { _id: ObjectId(id) };
             const options = { upsert: true };
-            const result = await movies.updateOne(filter, updatedItem, options);
-            res.send(result);
+            const productResult = await movies.updateOne(filter, updatedItem, options);
+            res.send(productResult);
         })
     }
     finally {
