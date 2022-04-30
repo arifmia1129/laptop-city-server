@@ -22,7 +22,6 @@ async function run() {
             const query = {};
             const cursor = productCollection.find(query);
             const items = await cursor.toArray();
-            console.log(items);
             res.send(items);
         })
 
@@ -33,17 +32,17 @@ async function run() {
             const item = await productCollection.findOne(query);
             res.send(item);
         })
-        // upadate single item
-        app.post("item/:id", async (req, res) => {
+        // update single item
+        app.put("/item/:id", async (req, res) => {
             const id = req.params.id;
-            const product = req.body;
+            const quantity = req.body;
             const updatedItem = {
-                $set: product
-            }
+                $set: quantity,
+            };
             const filter = { _id: ObjectId(id) };
             const options = { upsert: true };
-            const productResult = await movies.updateOne(filter, updatedItem, options);
-            res.send(productResult);
+            const result = await productCollection.updateOne(filter, updatedItem, options);
+            res.send(result);
         })
     }
     finally {
