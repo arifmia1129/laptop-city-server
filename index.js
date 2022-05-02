@@ -53,6 +53,14 @@ async function run() {
             const result = await productCollection.deleteOne(query);
             res.send(result);
         })
+
+        // single item insert api
+        app.post("/item", async (req, res) => {
+            const item = req.body.data;
+            console.log(item);
+            const result = await productCollection.insertOne(item);
+            res.send(result);
+        })
     }
     finally {
         // await client.close();
