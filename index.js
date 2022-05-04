@@ -57,9 +57,17 @@ async function run() {
         // single item insert api
         app.post("/item", async (req, res) => {
             const item = req.body.data;
-            console.log(item);
             const result = await productCollection.insertOne(item);
             res.send(result);
+        })
+
+        // Load all product info by email query
+        app.get("/myitems", async (req, res) => {
+            const email = req?.query?.email;
+            const query = { email: email };
+            const cursor = productCollection.find(query);
+            const items = await cursor.toArray();
+            res.send(items);
         })
     }
     finally {
