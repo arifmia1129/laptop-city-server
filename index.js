@@ -1,12 +1,32 @@
 const express = require("express");
 cors = require('cors');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+
+
+function verifyAuth(req, res, next) {
+    const reqAuth = req.headers.authorization;
+    if (!reqAuth) {
+        res.status(401).send({ message: "Unauthorization." });
+    }
+    const token = reqAuth.split(" ")[1];
+    jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+        if (err) {
+            res.status(403).send({ message: "Forbidden Access." });
+        }
+        else {
+            req.decoded = decoded;
+            next();
+        }
+    });
+}
+
 
 // MongoDB 
 
@@ -62,12 +82,27 @@ async function run() {
         })
 
         // Load all product info by email query
-        app.get("/myitems", async (req, res) => {
+        app.get("/myitems", verifyAuth, async (req, res) => {
+            const decodedEmail = req?.decoded?.user;
             const email = req?.query?.email;
-            const query = { email: email };
-            const cursor = productCollection.find(query);
-            const items = await cursor.toArray();
-            res.send(items);
+
+            if (decodedEmail === email) {
+                const query = { email: email };
+                const cursor = productCollection.find(query);
+                const items = await cursor.toArray();
+                res.send(items);
+            }
+            else {
+                res.status(403).send({ message: "Forbidden Access." })
+            }
+        })
+
+        app.post("/login", async (req, res) => {
+            const user = req.body.email;
+            const token = jwt.sign({ user }, process.env.SECRET_KEY, {
+                expiresIn: "1d"
+            })
+            res.send(token);
         })
     }
     finally {
