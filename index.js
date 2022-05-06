@@ -45,6 +45,15 @@ async function run() {
             res.send(items);
         })
 
+        app.get("/homepageitem", async (req, res) => {
+            const page = parseInt(req.query.page);
+            const size = parseInt(req.query.size);
+            const query = {};
+            const cursor = productCollection.find(query);
+            const items = await cursor.skip(page * size).limit(size).toArray();
+            res.send(items);
+        })
+
         // Load single product info
         app.get("/item/:id", async (req, res) => {
             const id = req.params.id;
@@ -103,6 +112,11 @@ async function run() {
                 expiresIn: "1d"
             })
             res.send(token);
+        })
+
+        app.get("/count", async (req, res) => {
+            const productCount = await productCollection.countDocuments();
+            res.send({ productCount });
         })
     }
     finally {
